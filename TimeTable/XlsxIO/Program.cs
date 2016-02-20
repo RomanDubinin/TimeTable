@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using ClosedXML.Excel;
 using TimeTable;
 
@@ -17,18 +16,20 @@ namespace XlsxIO
 		{
 			var filename = @"Копия Вахты.xlsx";
 			var listname = "Март";
-
+			MaiTableCell a;
 			var wishTable = ReadTableFromXlsx(filename, listname, WorkersCount, DaysCount);
+			var mainTable = MainTable.FromTtwoTables(WorkTable.CreateEmpty(WorkersCount, DaysCount), wishTable);
+
 			var algo = new Algotithm();
 
-			algo.RecursiveAlgo(WorkTable.CreateEmpty(WorkersCount, DaysCount), wishTable, 10);
+			algo.RecursiveAlgo(mainTable, 10);
 
 			for (int i = 0; i < algo.GeneratedTables.Count; i++)
 			{
 				string newListName = $"{listname} attemption {i + 1}";
 				CreateListCopy(filename, listname, newListName);
 
-				WriteWorkTableToXlsx(filename, newListName, algo.GeneratedTables[i]);
+				WriteWorkTableToXlsx(filename, newListName, algo.GeneratedTables[i].GetWorkTable);
 			}
 		}
 
@@ -39,10 +40,10 @@ namespace XlsxIO
 
 			var wishMatrix = new List<List<WishTableCell>>();
 
-			for (int i = 0; i < workTable.RowsCount; i++)
+			for (int i = 0; i < workTable.Matrix.Count; i++)
 			{
 				wishMatrix.Add(new List<WishTableCell>());
-				for (int j = 0; j < workTable.ColumnsCount; j++)
+				for (int j = 0; j < workTable[i].Count; j++)
 				{
 					if (workTable[i, j] == WorkTableCell.Work)
 						sheet.Row(i + firstStringNum).Cell(j + firstColumnNum).Value = "4";

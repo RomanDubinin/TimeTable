@@ -13,7 +13,7 @@ namespace TimeTable
 
 	public class WishTable
 	{
-		private List<List<WishTableCell>> Matrix;
+		public List<List<WishTableCell>> Matrix { get; }
 
 		public WishTable(List<List<WishTableCell>> matrix)
 		{
@@ -23,18 +23,6 @@ namespace TimeTable
 		public WishTableCell this[int i, int j]
 		{
 			get { return Matrix[i][j]; }
-		}
-
-		public List<int> SelectDays(int workerNum, WishTableCell cellValue)
-		{
-			List<int> result = new List<int>();
-			int n = Matrix[workerNum].Count;
-			for (int i = 0; i < n; i++)
-			{
-				if (Matrix[workerNum][i] == cellValue)
-					result.Add(i);
-			}
-			return result;
 		}
 	}
 }

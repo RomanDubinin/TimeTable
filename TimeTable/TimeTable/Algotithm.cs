@@ -9,51 +9,52 @@ namespace TimeTable
 	{
 		private int CurrentTimeTableNum = 0;
 		private int NecessaryCountOfWorkers = 2;
-		public List<WorkTable> GeneratedTables { get; private set; }
+		public List<MainTable> GeneratedTables { get; private set; }
 
 		public Algotithm()
 		{
-			GeneratedTables = new List<WorkTable>();
+			GeneratedTables = new List<MainTable>();
 		}
 
-		public void RecursiveAlgo(WorkTable workTable, WishTable wishTable, int maxAttemptNum)
+		public void RecursiveAlgo(MainTable mainTable, int maxAttemptNum)
 		{
 			if (CurrentTimeTableNum == maxAttemptNum)
 				return;
 
-			if (workTable.IsFilled(NecessaryCountOfWorkers))
+			if (mainTable.AllDaysAreFilled(NecessaryCountOfWorkers))
 			{
-				if (!GeneratedTables.Contains(workTable))
+				if (!GeneratedTables.Contains(mainTable))
 				{
-					GeneratedTables.Add(workTable);
+					GeneratedTables.Add(mainTable);
+					WriteTimeTableToFile(mainTable.GetWorkTable, mainTable.GetWishTable);
 					CurrentTimeTableNum++;
 					return;
 				}
 				return;
 			}
 
-			var sortedWorkerIndexes = workTable.GetOrderedByIncreaseOfWorkDays();
+			var sortedWorkerIndexes = mainTable.GetOrderedByIncreaseOfWorkDays();
 			foreach (var workerNum in sortedWorkerIndexes)
 			{
-				var preferredDays = wishTable.SelectDays(workerNum, WishTableCell.Yes);
+				var preferredDays = mainTable.SelectDays(workerNum, WishTableCell.Yes);
 
-				var seconfStage = wishTable.SelectDays(workerNum, WishTableCell.Empty)
-					.Where(dayNum => !workTable.HaveLeftFilledNeighbour(workerNum, dayNum));
+				var seconfStage = mainTable.SelectDays(workerNum, WishTableCell.Empty)
+					.Where(dayNum => !mainTable.PreviousDayIsWork(workerNum, dayNum));
 
-				var thirdStage = wishTable.SelectDays(workerNum, WishTableCell.Empty)
-					.Where(dayNum => workTable.HaveLeftFilledNeighbour(workerNum, dayNum));
+				var thirdStage = mainTable.SelectDays(workerNum, WishTableCell.Empty)
+					.Where(dayNum => mainTable.PreviousDayIsWork(workerNum, dayNum));
 
 				var possibleDays = preferredDays
 								   .Concat(seconfStage)
 								   .Concat(thirdStage)
-								   .Where(dayNum => !workTable.DayIsFilled(dayNum, NecessaryCountOfWorkers))
-								   .Where(dayNum => workTable[workerNum, dayNum] != WorkTableCell.Work);
+								   .Where(dayNum => !mainTable.DayIsFilled(dayNum, NecessaryCountOfWorkers))
+								   .Where(dayNum => mainTable[workerNum, dayNum].WorkCell != WorkTableCell.Work);
 
 				foreach (var dayNum in possibleDays)
 				{
-					var tableCopy = workTable.GetCopy();
-					tableCopy[workerNum, dayNum] = WorkTableCell.Work;
-					RecursiveAlgo(tableCopy, wishTable, maxAttemptNum);
+					var tableCopy = mainTable.GetCopy();
+					tableCopy[workerNum, dayNum].WorkCell = WorkTableCell.Work;
+					RecursiveAlgo(mainTable, maxAttemptNum);
 				}
 			}
 
