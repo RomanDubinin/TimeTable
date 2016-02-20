@@ -26,7 +26,6 @@ namespace TimeTable
 				if (!GeneratedTables.Contains(workTable))
 				{
 					GeneratedTables.Add(workTable);
-					//WriteTimeTableToFile(workTable, wishTable);
 					CurrentTimeTableNum++;
 					return;
 				}

@@ -29,6 +29,16 @@ namespace TimeTable
 			get { return Matrix.Count; }
 		}
 
+		public int RowsCount
+		{
+			get { return Matrix.Count; }
+		}
+
+		public int ColumnsCount
+		{
+			get { return Matrix[0].Count; }
+		}
+
 		public WorkTableCell this[int i, int j]
 		{
 			get { return Matrix[i][j]; }
