@@ -39,7 +39,11 @@ namespace TimeTable
 			foreach (var workerNum in sortedWorkerIndexes)
 			{
 				var preferredDays = wishTable.GetHisPreferredDays(workerNum);
-				var possibleDays = preferredDays.Where(dayNum => workTable.DayIsFilled(dayNum, NecessaryCountOfWorkers)).Concat(unfilledDays);
+
+				var possibleDays = preferredDays.Where(dayNum => !workTable.DayIsFilled(dayNum, NecessaryCountOfWorkers)).Concat(unfilledDays);
+
+
+
 				foreach (var dayNum in possibleDays)
 				{
 					if (ThisDayIsGoodToWork(wishTable, workTable, workerNum, dayNum))

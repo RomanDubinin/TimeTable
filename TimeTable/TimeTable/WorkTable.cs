@@ -54,8 +54,8 @@ namespace TimeTable
 					countOfWorkersToday++;
 			}
 			if (countOfWorkersToday < countOfWorkersToFill)
-				return true;
-			return false;
+				return false;
+			return true;
 		}
 
 		public List<int> GetUnfilledDayNumbers(int countOfWorkersToFill)
@@ -64,7 +64,7 @@ namespace TimeTable
 			int n = Matrix[0].Count;
 			for (int i = 0; i < n; i++)
 			{
-				if (DayIsFilled(i, countOfWorkersToFill))
+				if (!DayIsFilled(i, countOfWorkersToFill))
 					result.Add(i);
 			}
 			return result;
