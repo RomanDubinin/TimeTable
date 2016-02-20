@@ -7,10 +7,6 @@ namespace TimeTable
 {
 	class Program
 	{
-		static public int Count = 2;
-		static public int CurrentTimeTableNum = 1;
-
-		static public List<WorkTable> GeneratedTables; 
 
 		static void Main(string[] args)
 		{
@@ -40,85 +36,12 @@ namespace TimeTable
 
 			var wishTable = new WishTable(wishMatrix);
 			var workTable = WorkTable.CreateEmpty(wishMatrix.Count, wishMatrix[0].Count);
-			GeneratedTables = new List<WorkTable>();
 
-			RecursiveAlgo(workTable, wishTable);
-			Console.WriteLine(CurrentTimeTableNum);
+			var alg = new Algotithm();
+			alg.RecursiveAlgo(workTable, wishTable, 10);
 		}
 
-		public static void RecursiveAlgo(WorkTable workTable, WishTable wishTable)
-		{
-			if (workTable.IsFilled(Count))
-			{
-				if (CurrentTimeTableNum % 10 == 0)
-				{
-					Console.WriteLine(CurrentTimeTableNum);
-				}
-				if (!GeneratedTables.Contains(workTable))
-				{
-					GeneratedTables.Add(workTable);
-					WriteTimeTableToFile(workTable, wishTable);
-					CurrentTimeTableNum++;
-					return;
-				}
-				return;
-			}
-
-			var sortedWorkerIndexes = workTable.GetOrderedByIncreaseOfWorkDays();
-			var unfilledDays = workTable.GetUnfilledDayNumbers(Count);
-
-			foreach (var workerNum in sortedWorkerIndexes)
-			{
-				var preferredDays = wishTable.GetHisPreferredDays(workerNum);
-				var possibleDays = preferredDays.Where(dayNum => workTable.DayIsFilled(dayNum, Count)).Concat(unfilledDays);
-				foreach (var dayNum in possibleDays)
-				{
-					if (ThisDayIsGoodToWork(wishTable, workTable, workerNum, dayNum))
-					{
-						var tableCopy = workTable.GetCopy();
-						tableCopy[workerNum, dayNum] = WorkTableCell.Work;
-						RecursiveAlgo(tableCopy, wishTable);
-					}
-				}
-			}
-			
-		}
-
-		public static bool ThisDayIsGoodToWork(WishTable wishTable, WorkTable workTable, int workerNum, int dayNum)
-		{
-			if (
-				(wishTable[workerNum, dayNum] == WishTableCell.Empty ||
-				 wishTable[workerNum, dayNum] == WishTableCell.Yes) &&
-				workTable[workerNum, dayNum] == WorkTableCell.Empty)
-				return true;
-			return false;
-
-
-		}
-
-		public static void WriteTimeTableToFile(WorkTable workTtable, WishTable wishTable)
-		{
-			using (StreamWriter writer = new StreamWriter(CurrentTimeTableNum + ".txt"))
-			{
-				for (int i = 0; i < workTtable.WorkersCount; i++)
-				{
-					writer.Write("{0, 2}|", i);
-					for (int j = 0; j < workTtable.DaysCount; j++)
-					{
-						if (workTtable[i, j] == WorkTableCell.Work)
-							writer.Write("#");
-						else if (wishTable[i, j] == WishTableCell.No)
-							writer.Write("-");
-						else if (wishTable[i, j] == WishTableCell.Yes && workTtable[i, j] != WorkTableCell.Work)
-							writer.Write("+");
-						else
-							writer.Write(" ");
-					}
-					writer.Write("  |" + workTtable.CountOfWorkDays(i));
-					writer.Write('\n');
-				}
-			}
-		}
+		
 
 	}
 }

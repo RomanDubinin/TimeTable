@@ -10,7 +10,7 @@ namespace TimeTable
 		Work
 	}
 
-	class WorkTable : IEquatable<WorkTable>
+	public class WorkTable : IEquatable<WorkTable>
 	{
 		private List<List<WorkTableCell>> Matrix;
 
