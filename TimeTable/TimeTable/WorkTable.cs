@@ -89,7 +89,7 @@ namespace TimeTable
 
 		public List<int> GetOrderedByIncreaseOfWorkDays()
 		{
-			var orderedrows = Matrix.OrderByDescending(row => CountOfWorkDays(row)).Reverse().ToList();
+			var orderedrows = Matrix.OrderBy(row => CountOfWorkDays(row)).ToList();
 			var indexes = orderedrows.Select(row => Matrix.IndexOf(row));
 			return indexes.ToList();
 		}

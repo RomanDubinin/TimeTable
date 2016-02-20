@@ -15,8 +15,8 @@ namespace XlsxIO
 
 		static void Main(string[] args)
 		{
-			var filename = @"Копия Вахты-хуяхты.xlsx";
-			var listname = "Февраль";
+			var filename = @"Копия Вахты.xlsx";
+			var listname = "Март";
 
 			var wishTable = ReadTableFromXlsx(filename, listname, WorkersCount, DaysCount);
 			var algo = new Algotithm();
