@@ -34,24 +34,27 @@ namespace TimeTable
 			}
 
 			var sortedWorkerIndexes = workTable.GetOrderedByIncreaseOfWorkDays();
-			var unfilledDays = workTable.GetUnfilledDayNumbers(NecessaryCountOfWorkers);
-
 			foreach (var workerNum in sortedWorkerIndexes)
 			{
-				var preferredDays = wishTable.GetHisPreferredDays(workerNum);
+				var preferredDays = wishTable.SelectDays(workerNum, WishTableCell.Yes);
 
-				var possibleDays = preferredDays.Where(dayNum => !workTable.DayIsFilled(dayNum, NecessaryCountOfWorkers)).Concat(unfilledDays);
+				var seconfStage = wishTable.SelectDays(workerNum, WishTableCell.Empty)
+					.Where(dayNum => !workTable.HaveLeftFilledNeighbour(workerNum, dayNum));
 
+				var thirdStage = wishTable.SelectDays(workerNum, WishTableCell.Empty)
+					.Where(dayNum => workTable.HaveLeftFilledNeighbour(workerNum, dayNum));
 
+				var possibleDays = preferredDays
+								   .Concat(seconfStage)
+								   .Concat(thirdStage)
+								   .Where(dayNum => !workTable.DayIsFilled(dayNum, NecessaryCountOfWorkers))
+								   .Where(dayNum => workTable[workerNum, dayNum] != WorkTableCell.Work);
 
 				foreach (var dayNum in possibleDays)
 				{
-					if (ThisDayIsGoodToWork(wishTable, workTable, workerNum, dayNum))
-					{
-						var tableCopy = workTable.GetCopy();
-						tableCopy[workerNum, dayNum] = WorkTableCell.Work;
-						RecursiveAlgo(tableCopy, wishTable, maxAttemptNum);
-					}
+					var tableCopy = workTable.GetCopy();
+					tableCopy[workerNum, dayNum] = WorkTableCell.Work;
+					RecursiveAlgo(tableCopy, wishTable, maxAttemptNum);
 				}
 			}
 

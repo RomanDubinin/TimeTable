@@ -25,13 +25,13 @@ namespace TimeTable
 			get { return Matrix[i][j]; }
 		}
 
-		public List<int> GetHisPreferredDays(int workerNum)
+		public List<int> SelectDays(int workerNum, WishTableCell cellValue)
 		{
 			List<int> result = new List<int>();
 			int n = Matrix[workerNum].Count;
 			for (int i = 0; i < n; i++)
 			{
-				if (Matrix[workerNum][i] == WishTableCell.Yes)
+				if (Matrix[workerNum][i] == cellValue)
 					result.Add(i);
 			}
 			return result;

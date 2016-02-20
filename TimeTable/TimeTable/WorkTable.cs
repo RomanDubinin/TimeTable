@@ -126,5 +126,13 @@ namespace TimeTable
 			}
 			return new WorkTable(workMatrix);
 		}
+
+		public bool HaveLeftFilledNeighbour(int workerNum, int dayNum)
+		{
+			if (dayNum == 0 || Matrix[workerNum][dayNum] == WorkTableCell.Empty)
+				return false;
+
+			return true;
+		}
 	}
 }
