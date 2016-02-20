@@ -9,7 +9,7 @@ namespace TimeTable
 	{
 		private int CurrentTimeTableNum = 0;
 		private int NecessaryCountOfWorkers = 2;
-		public List<WorkTable> GeneratedTables;
+		public List<WorkTable> GeneratedTables { get; private set; }
 
 		public Algotithm()
 		{
@@ -26,7 +26,7 @@ namespace TimeTable
 				if (!GeneratedTables.Contains(workTable))
 				{
 					GeneratedTables.Add(workTable);
-					WriteTimeTableToFile(workTable, wishTable);
+					//WriteTimeTableToFile(workTable, wishTable);
 					CurrentTimeTableNum++;
 					return;
 				}
