@@ -67,12 +67,13 @@ namespace TimeTable
 
 		public List<int> GetOrderedByIncreaseOfWorkDays()
 		{
-            var r = new Random();
-            var orderedrows = Table
-                .OrderBy(x => r.Next())
+			var now = DateTime.Now;
+			var r = new Random(now.Hour + now.Second + now.Millisecond);
+			var orderedrows = Table
 				.OrderBy(row => row.Count(x => x.WorkCell == WorkTableCell.Work))
 				.ThenByDescending(row => row.Count(x => x.WishCell == WishTableCell.Yes && x.WorkCell == WorkTableCell.Empty))
-                .ToList();
+				.ThenBy(x => r.Next(DateTime.Now.Second))
+				.ToList();
 			var indexes = orderedrows.Select(row => Table.IndexOf(row));
 			return indexes.ToList();
 		}
@@ -141,7 +142,7 @@ namespace TimeTable
 
 		public bool PreviousDayIsWork(int workerNum, int dayNum)
 		{
-			if (dayNum == 0 || Table[workerNum][dayNum].WorkCell == WorkTableCell.Empty)
+			if (dayNum == 0 || Table[workerNum][dayNum-1].WorkCell == WorkTableCell.Empty)
 				return false;
 
 			return true;

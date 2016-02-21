@@ -19,10 +19,5 @@ namespace TimeTable
 		{
 			Matrix = matrix;
 		}
-
-		public WishTableCell this[int i, int j]
-		{
-			get { return Matrix[i][j]; }
-		}
 	}
 }

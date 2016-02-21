@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 using ClosedXML.Excel;
 using TimeTable;
 
@@ -26,7 +27,7 @@ namespace XlsxIO
 
 			for (int i = 0; i < algo.GeneratedTables.Count; i++)
 			{
-				string newListName = $"{listname} attemption {i + 1}";
+				string newListName = $"{listname} filled {i + 1}";
 				CreateListCopy(filename, listname, newListName);
 
 				WriteWorkTableToXlsx(filename, newListName, algo.GeneratedTables[i].GetWorkTable);
@@ -43,9 +44,9 @@ namespace XlsxIO
 			for (int i = 0; i < workTable.Matrix.Count; i++)
 			{
 				wishMatrix.Add(new List<WishTableCell>());
-				for (int j = 0; j < workTable[i].Count; j++)
+				for (int j = 0; j < workTable.Matrix[i].Count; j++)
 				{
-					if (workTable[i, j] == WorkTableCell.Work)
+					if (workTable.Matrix[i][j] == WorkTableCell.Work)
 						sheet.Row(i + FirstStringNum).Cell(j + FirstColumnNum).Value = "4";
 				}
 			}
@@ -91,6 +92,30 @@ namespace XlsxIO
 			{ }
 			sheet.CopyTo(copyName);
 			book.Save();
+		}
+
+		public void WriteTimeTableToFile(string filename, WorkTable workTtable, WishTable wishTable)
+		{
+			using (StreamWriter writer = new StreamWriter(filename + ".txt"))
+			{
+				for (int i = 0; i < workTtable.Matrix.Count; i++)
+				{
+					writer.Write("{0, 2}|", i);
+					for (int j = 0; j < workTtable.Matrix[i].Count; j++)
+					{
+						if (workTtable.Matrix[i][j] == WorkTableCell.Work)
+							writer.Write("#");
+						else if (wishTable.Matrix[i][j] == WishTableCell.No)
+							writer.Write("-");
+						else if (wishTable.Matrix[i][j] == WishTableCell.Yes && workTtable.Matrix[i][j] != WorkTableCell.Work)
+							writer.Write("+");
+						else
+							writer.Write(" ");
+					}
+					writer.Write("  |" + workTtable.CountOfWorkDays(i));
+					writer.Write('\n');
+				}
+			}
 		}
 	}
 }

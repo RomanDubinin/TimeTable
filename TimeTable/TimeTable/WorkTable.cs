@@ -19,27 +19,6 @@ namespace TimeTable
 			Matrix = matrix;
 		}
 
-		public int DaysCount
-		{
-			get {return Matrix[0].Count;}
-		}
-
-		public int WorkersCount
-		{
-			get { return Matrix.Count; }
-		}
-
-		public WorkTableCell this[int i, int j]
-		{
-			get { return Matrix[i][j]; }
-			set { Matrix[i][j] = value; }
-		}
-
-		public List<WorkTableCell> this[int i]
-		{
-			get { return Matrix[i]; }
-		}
-
 		public int CountOfWorkDays(int workerNum)
 		{
 			return Matrix[workerNum].Count(x => x == WorkTableCell.Work);
@@ -51,7 +30,7 @@ namespace TimeTable
 			{
 				for (int j = 0; j < Matrix[i].Count; j++)
 				{
-					if (this[i, j] != other[i, j])
+					if (Matrix[i][j] != other.Matrix[i][j])
 						return false;
 				}
 			}
