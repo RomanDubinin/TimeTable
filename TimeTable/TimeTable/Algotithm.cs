@@ -33,19 +33,22 @@ namespace TimeTable
 			var sortedWorkerIndexes = mainTable.GetOrderedByIncreaseOfWorkDays();
 			foreach (var workerNum in sortedWorkerIndexes)
 			{
-				var preferredDays = mainTable.SelectDays(workerNum, WishTableCell.Yes);
+				var preferredDays = mainTable
+					.SelectDays(workerNum, WishTableCell.Yes);
 
-				var seconfStage = mainTable.SelectDays(workerNum, WishTableCell.Empty)
+				var secondStage = mainTable
+					.SelectDays(workerNum, WishTableCell.Empty)
 					.Where(dayNum => !mainTable.PreviousDayIsWork(workerNum, dayNum));
 
-				var thirdStage = mainTable.SelectDays(workerNum, WishTableCell.Empty)
+				var thirdStage = mainTable
+					.SelectDays(workerNum, WishTableCell.Empty)
 					.Where(dayNum => mainTable.PreviousDayIsWork(workerNum, dayNum));
 
 				var possibleDays = preferredDays
-								   .Concat(seconfStage)
-								   .Concat(thirdStage)
-								   .Where(dayNum => !mainTable.DayIsFilled(dayNum, NecessaryCountOfWorkers))
-								   .Where(dayNum => mainTable[workerNum, dayNum].WorkCell != WorkTableCell.Work);
+					.Concat(secondStage)
+					.Concat(thirdStage)
+					.Where(dayNum => !mainTable.DayIsFilled(dayNum, NecessaryCountOfWorkers))
+					.Where(dayNum => mainTable[workerNum, dayNum].WorkCell != WorkTableCell.Work);
 
 				foreach (var dayNum in possibleDays)
 				{
