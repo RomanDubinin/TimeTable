@@ -70,8 +70,8 @@ namespace TimeTable
 			var now = DateTime.Now;
 			var r = new Random(now.Hour + now.Second + now.Millisecond);
 			var orderedrows = Table
-				.OrderBy(row => row.Count(x => x.WorkCell == WorkTableCell.Work))
-				.ThenByDescending(row => row.Count(x => x.WishCell == WishTableCell.Yes && x.WorkCell == WorkTableCell.Empty))
+				.OrderByDescending(row => row.Count(x => x.WishCell == WishTableCell.Yes && x.WorkCell == WorkTableCell.Empty))
+				.ThenBy(row => row.Count(x => x.WorkCell == WorkTableCell.Work))
 				.ThenBy(x => r.Next(DateTime.Now.Second))
 				.ToList();
 			var indexes = orderedrows.Select(row => Table.IndexOf(row));
