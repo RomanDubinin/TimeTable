@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace TimeTable
@@ -66,9 +67,12 @@ namespace TimeTable
 
 		public List<int> GetOrderedByIncreaseOfWorkDays()
 		{
-			var orderedrows = Table.ToArray()
+            var r = new Random();
+            var orderedrows = Table
+                .OrderBy(x => r.Next())
 				.OrderBy(row => row.Count(x => x.WorkCell == WorkTableCell.Work))
-				.ThenByDescending(row => row.Count(x => x.WishCell == WishTableCell.Yes && x.WorkCell == WorkTableCell.Empty)).ToList();
+				.ThenByDescending(row => row.Count(x => x.WishCell == WishTableCell.Yes && x.WorkCell == WorkTableCell.Empty))
+                .ToList();
 			var indexes = orderedrows.Select(row => Table.IndexOf(row));
 			return indexes.ToList();
 		}

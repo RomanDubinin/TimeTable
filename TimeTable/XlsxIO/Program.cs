@@ -6,18 +6,18 @@ namespace XlsxIO
 {
 	class Program
 	{
-		private static int firstStringNum = 6;
-		private static int firstColumnNum = 2;
+		private static int FirstStringNum = 6;
+		private static int FirstColumnNum = 2;
 
 		private static int WorkersCount = 14;
-		private static int DaysCount = 29;
+		private static int DaysCount = 31;
 
 		static void Main(string[] args)
 		{
-			var filename = @"Копия Вахты.xlsx";
+			var filename = @"Копия Вахты.xlsx.xlsx";
 			var listname = "Март";
-			MaiTableCell a;
-			var wishTable = ReadTableFromXlsx(filename, listname, WorkersCount, DaysCount);
+
+			var wishTable = ReadTableFromXlsx(filename, listname);
 			var mainTable = MainTable.FromTtwoTables(WorkTable.CreateEmpty(WorkersCount, DaysCount), wishTable);
 
 			var algo = new Algotithm();
@@ -46,29 +46,29 @@ namespace XlsxIO
 				for (int j = 0; j < workTable[i].Count; j++)
 				{
 					if (workTable[i, j] == WorkTableCell.Work)
-						sheet.Row(i + firstStringNum).Cell(j + firstColumnNum).Value = "4";
+						sheet.Row(i + FirstStringNum).Cell(j + FirstColumnNum).Value = "4";
 				}
 			}
 
 			book.Save();
 		}
 
-		public static WishTable ReadTableFromXlsx(string filename, string listname, int workersCount, int daysCount)
+		public static WishTable ReadTableFromXlsx(string filename, string listname)
 		{
 			var book = new XLWorkbook(filename);
 			var sheet = book.Worksheets.Worksheet(listname);
 
 			var wishMatrix = new List<List<WishTableCell>>();
 
-			for (int i = 0; i < workersCount; i++)
+			for (int i = 0; i < WorkersCount; i++)
 			{
 				wishMatrix.Add(new List<WishTableCell>());
-				for (int j = 0; j < daysCount; j++)
+				for (int j = 0; j < DaysCount; j++)
 				{
-					if (sheet.Row(i + firstStringNum).Cell(j + firstColumnNum).Style.Fill.BackgroundColor == XLColor.Lime)
+					if (sheet.Row(i + FirstStringNum).Cell(j + FirstColumnNum).Style.Fill.BackgroundColor == XLColor.Lime)
 						wishMatrix[i].Add(WishTableCell.Yes);
 
-					else if (sheet.Row(i + firstStringNum).Cell(j + firstColumnNum).Style.Fill.BackgroundColor == XLColor.Red)
+					else if (sheet.Row(i + FirstStringNum).Cell(j + FirstColumnNum).Style.Fill.BackgroundColor == XLColor.Red)
 						wishMatrix[i].Add(WishTableCell.No);
 
 					else
