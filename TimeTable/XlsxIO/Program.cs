@@ -15,11 +15,11 @@ namespace XlsxIO
 
 		static void Main(string[] args)
 		{
-			var filename = @"Копия Вахты.xlsx.xlsx";
+			var filename = @"C:\Users\Roman_000\Downloads\Вахты.xlsx";
 			var listname = "Март";
 
 			var wishTable = ReadTableFromXlsx(filename, listname);
-			var mainTable = MainTable.FromTtwoTables(WorkTable.CreateEmpty(WorkersCount, DaysCount), wishTable);
+			var mainTable = MainTable.FromTtwoTables(WorkTable.CreateEmpty(WorkersCount, DaysCount), wishTable, 2);
 
 			var algo = new Algotithm();
 

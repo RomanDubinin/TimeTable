@@ -7,14 +7,17 @@ namespace TimeTable
 	public class MainTable
 	{
 		private List<List<MaiTableCell>> Table;
+		private int WorkersToOneDay;
 
-		public MainTable(List<List<MaiTableCell>> table)
+		public MainTable(List<List<MaiTableCell>> table, int workersToOneDay)
 		{
 			Table = table;
+			WorkersToOneDay = workersToOneDay;
 		}
 
-		public MainTable(List<List<WorkTableCell>> workTable, List<List<WishTableCell>> wishTable)
+		public MainTable(List<List<WorkTableCell>> workTable, List<List<WishTableCell>> wishTable, int workersToOneDay)
 		{
+			WorkersToOneDay = workersToOneDay;
 			Table = new List<List<MaiTableCell>>();
 			for (int i = 0; i < workTable.Count; i++)
 			{
@@ -60,9 +63,9 @@ namespace TimeTable
 			}
 		}
 
-		public static MainTable FromTtwoTables(WorkTable workTable, WishTable wishTable)
+		public static MainTable FromTtwoTables(WorkTable workTable, WishTable wishTable, int workersToOneDay)
 		{
-			return new MainTable(workTable.Matrix, wishTable.Matrix);
+			return new MainTable(workTable.Matrix, wishTable.Matrix, workersToOneDay);
 		}
 
 		public List<int> GetOrderedByIncreaseOfWorkDays()
@@ -70,7 +73,8 @@ namespace TimeTable
 			var now = DateTime.Now;
 			var r = new Random(now.Hour + now.Second + now.Millisecond);
 			var orderedrows = Table
-				.OrderByDescending(row => row.Count(x => x.WishCell == WishTableCell.Yes && x.WorkCell == WorkTableCell.Empty))
+				.OrderBy(row => row.Count(x => x.WishCell == WishTableCell.Yes && x.WorkCell == WorkTableCell.Empty) == 0? 1 : 0)
+				.ThenBy(row => row.Count(x => x.WishCell == WishTableCell.Yes && x.WorkCell == WorkTableCell.Empty))
 				.ThenBy(row => row.Count(x => x.WorkCell == WorkTableCell.Work))
 				.ThenBy(x => r.Next(DateTime.Now.Second))
 				.ToList();
@@ -78,26 +82,39 @@ namespace TimeTable
 			return indexes.ToList();
 		}
 
-		public bool AllDaysAreFilled(int necessaryCountOfWorkers)
+		public void SetWork(int workerNum, int dayNum)
 		{
-			if (GetUnfilledDayNumbers(necessaryCountOfWorkers).Count == 0)
+			Table[workerNum][dayNum].WorkCell = WorkTableCell.Work;
+			
+				if (DayIsFilled(dayNum))
+				{
+					for (int i = 0; i < Table.Count; i++)
+					{
+						Table[i][dayNum].WishCell = WishTableCell.No;
+					}
+				}
+		}
+
+		public bool AllDaysAreFilled()
+		{
+			if (GetUnfilledDayNumbers().Count == 0)
 				return true;
 			return false;
 		}
 
-		public List<int> GetUnfilledDayNumbers(int necessaryCountOfWorkers)
+		public List<int> GetUnfilledDayNumbers()
 		{
 			List<int> result = new List<int>();
 			int n = Table[0].Count;
 			for (int dayNumber = 0; dayNumber < n; dayNumber++)
 			{
-				if (!DayIsFilled(dayNumber, necessaryCountOfWorkers))
+				if (!DayIsFilled(dayNumber))
 					result.Add(dayNumber);
 			}
 			return result;
 		}
 
-		public bool DayIsFilled(int dayNum, int countOfWorkersToFill)
+		public bool DayIsFilled(int dayNum)
 		{
 			var countOfWorkersToday = 0;
 			foreach (var row in Table)
@@ -105,7 +122,7 @@ namespace TimeTable
 				if (row[dayNum].WorkCell == WorkTableCell.Work)
 					countOfWorkersToday++;
 			}
-			if (countOfWorkersToday < countOfWorkersToFill)
+			if (countOfWorkersToday < WorkersToOneDay)
 				return false;
 			return true;
 		}
@@ -160,7 +177,7 @@ namespace TimeTable
 				}
 
 			}
-			return new MainTable(copy);
+			return new MainTable(copy, WorkersToOneDay);
 		}
 	}
 }

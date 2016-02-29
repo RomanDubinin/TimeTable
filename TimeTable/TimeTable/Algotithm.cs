@@ -6,7 +6,6 @@ namespace TimeTable
 	public class Algotithm
 	{
 		private int CurrentTimeTableNum = 0;
-		private int NecessaryCountOfWorkers = 2;
 		public List<MainTable> GeneratedTables { get; private set; }
 
 		public Algotithm()
@@ -19,7 +18,7 @@ namespace TimeTable
 			if (CurrentTimeTableNum == maxAttemptNum)
 				return;
 
-			if (mainTable.AllDaysAreFilled(NecessaryCountOfWorkers))
+			if (mainTable.AllDaysAreFilled())
 			{
 				if (!GeneratedTables.Contains(mainTable))
 				{
@@ -47,13 +46,13 @@ namespace TimeTable
 				var possibleDays = preferredDays
 					.Concat(secondStage)
 					.Concat(thirdStage)
-					.Where(dayNum => !mainTable.DayIsFilled(dayNum, NecessaryCountOfWorkers))
+					.Where(dayNum => !mainTable.DayIsFilled(dayNum))
 					.Where(dayNum => mainTable[workerNum, dayNum].WorkCell != WorkTableCell.Work);
 
 				foreach (var dayNum in possibleDays)
 				{
 					var tableCopy = mainTable.GetCopy();
-					tableCopy[workerNum, dayNum].WorkCell = WorkTableCell.Work;
+					tableCopy.SetWork(workerNum, dayNum);
 					RecursiveAlgo(mainTable, maxAttemptNum);
 				}
 			}
