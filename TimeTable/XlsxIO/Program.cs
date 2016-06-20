@@ -1,83 +1,54 @@
-﻿using System.Collections.Generic;
-using System.IO;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using ClosedXML.Excel;
-using TimeTable;
+using OfficeOpenXml;
 
 namespace XlsxIO
 {
 	class Program
 	{
-		private static int FirstStringNum = 6;
+		private static int FirstStringNum = 4;
 		private static int FirstColumnNum = 2;
 
 		private static int WorkersCount = 14;
-		private static int DaysCount = 31;
+		private static int DaysCount = 30;
+		private static int DistributedDaysCount = 7;
 
 		static void Main(string[] args)
 		{
-			var filename = @"C:\Users\Roman_000\Downloads\Вахты.xlsx";
-			var listname = "Март";
+			var filename = @"C:\Users\RomanUser\Google Drive\Скиф\Расписание.xlsx";
+			var sheetName = "Лист1";
 
-			var wishTable = ReadTableFromXlsx(filename, listname);
-			var mainTable = MainTable.FromTtwoTables(WorkTable.CreateEmpty(WorkersCount, DaysCount), wishTable, 2);
-
-			var algo = new Algotithm();
-
-			algo.RecursiveAlgo(mainTable, 10);
-
-			for (int i = 0; i < algo.GeneratedTables.Count; i++)
+			var book = new XLWorkbook(filename);
+			var sheet = book.Worksheets.Worksheet(sheetName);
+			try
 			{
-				string newListName = $"{listname} filled {i + 1}";
-				CreateListCopy(filename, listname, newListName);
-
-				WriteWorkTableToXlsx(filename, newListName, algo.GeneratedTables[i].GetWorkTable);
+				book.Worksheets.Add(DateTime.Now.Month.ToString());
 			}
-		}
-
-		private static void WriteWorkTableToXlsx(string xlsxFilename, string listName, WorkTable workTable)
-		{
-			var book = new XLWorkbook(xlsxFilename);
-			var sheet = book.Worksheets.Worksheet(listName);
-
-			var wishMatrix = new List<List<WishTableCell>>();
-
-			for (int i = 0; i < workTable.Matrix.Count; i++)
+			catch (System.ArgumentException)
 			{
-				wishMatrix.Add(new List<WishTableCell>());
-				for (int j = 0; j < workTable.Matrix[i].Count; j++)
-				{
-					if (workTable.Matrix[i][j] == WorkTableCell.Work)
-						sheet.Row(i + FirstStringNum).Cell(j + FirstColumnNum).Value = "4";
-				}
+				
 			}
+			DropNearestDay(book, sheetName);
+
+			var str = sheet.Row(4).Cell(33).Value.ToString().Split(',').ToList()[0];
+
+			Console.WriteLine(DateTime.Parse(str));
 
 			book.Save();
+
 		}
 
-		public static WishTable ReadTableFromXlsx(string filename, string listname)
+		public static void DropNearestDay(ClosedXML.Excel.XLWorkbook book, string sheetName)
 		{
-			var book = new XLWorkbook(filename);
-			var sheet = book.Worksheets.Worksheet(listname);
+			var sheet = book.Worksheets.Worksheet(sheetName);
 
-			var wishMatrix = new List<List<WishTableCell>>();
+			for (int i = FirstStringNum; i < FirstStringNum + WorkersCount; i++)
+				for (int j = FirstColumnNum; j < FirstColumnNum + DaysCount; j++)
+					sheet.Row(i).Cell(j).Value = sheet.Row(i).Cell(j + 1);
 
-			for (int i = 0; i < WorkersCount; i++)
-			{
-				wishMatrix.Add(new List<WishTableCell>());
-				for (int j = 0; j < DaysCount; j++)
-				{
-					if (sheet.Row(i + FirstStringNum).Cell(j + FirstColumnNum).Style.Fill.BackgroundColor == XLColor.Lime)
-						wishMatrix[i].Add(WishTableCell.Yes);
-
-					else if (sheet.Row(i + FirstStringNum).Cell(j + FirstColumnNum).Style.Fill.BackgroundColor == XLColor.Red)
-						wishMatrix[i].Add(WishTableCell.No);
-
-					else
-						wishMatrix[i].Add(WishTableCell.Empty);
-				}
-			}
-
-			return new WishTable(wishMatrix);
+			book.Save();
 		}
 
 		public static void CreateListCopy(string xlsxFilename, string originalListName, string copyName)
@@ -94,28 +65,6 @@ namespace XlsxIO
 			book.Save();
 		}
 
-		public void WriteTimeTableToFile(string filename, WorkTable workTtable, WishTable wishTable)
-		{
-			using (StreamWriter writer = new StreamWriter(filename + ".txt"))
-			{
-				for (int i = 0; i < workTtable.Matrix.Count; i++)
-				{
-					writer.Write("{0, 2}|", i);
-					for (int j = 0; j < workTtable.Matrix[i].Count; j++)
-					{
-						if (workTtable.Matrix[i][j] == WorkTableCell.Work)
-							writer.Write("#");
-						else if (wishTable.Matrix[i][j] == WishTableCell.No)
-							writer.Write("-");
-						else if (wishTable.Matrix[i][j] == WishTableCell.Yes && workTtable.Matrix[i][j] != WorkTableCell.Work)
-							writer.Write("+");
-						else
-							writer.Write(" ");
-					}
-					writer.Write("  |" + workTtable.CountOfWorkDays(i));
-					writer.Write('\n');
-				}
-			}
-		}
+		
 	}
 }
