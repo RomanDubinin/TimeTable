@@ -18,6 +18,8 @@ namespace XlsxIO
 		private static String DynamicSheetName = "Лист1";
 		private static String StatisticSheetName = "Карма";
 
+		public static TimeSpan StatisticHoldTime = TimeSpan.FromDays(100);
+
 		static void Main(string[] args)
 		{
 			var filename = @"C:\Users\RomanUser\Google Drive\Скиф\Расписание.xlsx";
@@ -31,7 +33,7 @@ namespace XlsxIO
 
 			CopyNearestDayToStaticTable(book, DynamicSheetName, date.ToString("MMMM"));
 			AddNearestDayToStatistic(book, DynamicSheetName, StatisticSheetName);
-
+			DeleteOldStatistic(book, StatisticSheetName, date);
 
 			ShiftDays(book, DynamicSheetName);
 			ShiftDates(book, DynamicSheetName);
@@ -44,25 +46,42 @@ namespace XlsxIO
 
 		}
 
+		private static void DeleteOldStatistic(XLWorkbook book, string statisticTableName, DateTime currentDate)
+		{
+			var statisticSheet = book.Worksheets.Worksheet(statisticTableName);
+
+			for (int i = FirstStringNum; i < FirstStringNum + WorkersCount; i++)
+			{
+				if (statisticSheet.Cell(i, 2).Value.ToString().Equals(""))
+					continue;
+				var dates = statisticSheet.Cell(i, 2).Value.ToString()
+					.Split(',')
+					.Select(s => DateTime.Parse(s))
+					.Where(date => currentDate - date < StatisticHoldTime);
+
+				statisticSheet.Cell(i, 2).Value = String.Join(",", dates);
+			}
+
+		}
+
 		private static void AddNearestDayToStatistic(XLWorkbook book, string dynamicTableName, string statisticTableName)
 		{
 			var dynamicSheet = book.Worksheets.Worksheet(dynamicTableName);
 			var statisticSheet = book.Worksheets.Worksheet(statisticTableName);
 
-			var date = GetDate(dynamicSheet, 1);
+			var currentDate = GetDate(dynamicSheet, 1);
 
 			for (int i = FirstStringNum; i < FirstStringNum + WorkersCount; i++)
 			{
 				if (dynamicSheet.Cell(i, FirstColumnNum).Value.ToString().Equals("4"))
 				{
 					if (!statisticSheet.Cell(i, 2).Value.ToString().Equals(""))
-						statisticSheet.Cell(i, 2).Value += ", " + date.ToString("d");
+						statisticSheet.Cell(i, 2).Value += "," + currentDate.ToString("d");
 					else
-						statisticSheet.Cell(i, 2).Value += date.ToString("d");
+						statisticSheet.Cell(i, 2).Value += currentDate.ToString("d");
 					
 				}
 			}
-
 		}
 
 		private static void CopyNearestDayToStaticTable(XLWorkbook book, string dynamicTableName, string staticTableName)
