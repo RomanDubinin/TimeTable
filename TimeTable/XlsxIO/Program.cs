@@ -15,28 +15,23 @@ namespace XlsxIO
 		private static int DaysCount = 30;
 		private static int DistributedDaysCount = 7;
 
+		private static String DynamicListName = "Лист1";
+
 		static void Main(string[] args)
 		{
 			var filename = @"C:\Users\RomanUser\Google Drive\Скиф\Расписание.xlsx";
-			var sheetName = "Лист1";
 
 			var book = new XLWorkbook(filename);
-			var sheet = book.Worksheets.Worksheet(sheetName);
-			try
-			{
-				book.Worksheets.Add(DateTime.Now.Month.ToString());
-			}
-			catch (System.ArgumentException)
-			{
-				
-			}
+			var sheet = book.Worksheets.Worksheet(DynamicListName);
+			
 			var date = GetDate(sheet, 1);
 
 			CreatePatternCopyIfNotExist(book, "Шаблон", date);
-			
 
-			ShiftDays(book, sheetName);
-			ShiftDates(book, sheetName);
+			CopyNearestDayToStaticTable(book, DynamicListName, date.ToString("MMMM"));
+
+			ShiftDays(book, DynamicListName);
+			ShiftDates(book, DynamicListName);
 
 			var str = sheet.Row(4).Cell(33).Value.ToString().Split(',').ToList()[0];
 
@@ -44,6 +39,18 @@ namespace XlsxIO
 
 			book.Save();
 
+		}
+
+		private static void CopyNearestDayToStaticTable(XLWorkbook book, string dynamicTableName, string staticTableName)
+		{
+			var dynamicSheet = book.Worksheets.Worksheet(dynamicTableName);
+			var staticSheet = book.Worksheets.Worksheet(staticTableName);
+			var day = int.Parse(dynamicSheet.Cell(FirstStringNum - 1, FirstColumnNum).Value.ToString());
+
+			for (int i = FirstStringNum; i < FirstStringNum + WorkersCount; i++)
+			{
+				staticSheet.Cell(i, FirstColumnNum + day - 1).Value = dynamicSheet.Cell(i, FirstColumnNum).Value;
+			}
 		}
 
 		public static void ShiftDays(XLWorkbook book, string sheetName)
@@ -95,7 +102,5 @@ namespace XlsxIO
 			newSheet.Row(1).Cell(1).Value = date.Year;
 			newSheet.Row(2).Cell(1).Value = date.ToString("MMMM");
 		}
-
-		
 	}
 }
