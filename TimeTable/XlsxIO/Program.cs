@@ -15,29 +15,53 @@ namespace XlsxIO
 		private static int DaysCount = 30;
 		private static int DistributedDaysCount = 7;
 
-		private static String DynamicListName = "Лист1";
+		private static String DynamicSheetName = "Лист1";
+		private static String StatisticSheetName = "Карма";
 
 		static void Main(string[] args)
 		{
 			var filename = @"C:\Users\RomanUser\Google Drive\Скиф\Расписание.xlsx";
 
 			var book = new XLWorkbook(filename);
-			var sheet = book.Worksheets.Worksheet(DynamicListName);
+			var sheet = book.Worksheets.Worksheet(DynamicSheetName);
 			
 			var date = GetDate(sheet, 1);
 
 			CreatePatternCopyIfNotExist(book, "Шаблон", date);
 
-			CopyNearestDayToStaticTable(book, DynamicListName, date.ToString("MMMM"));
+			CopyNearestDayToStaticTable(book, DynamicSheetName, date.ToString("MMMM"));
+			AddNearestDayToStatistic(book, DynamicSheetName, StatisticSheetName);
 
-			ShiftDays(book, DynamicListName);
-			ShiftDates(book, DynamicListName);
+
+			ShiftDays(book, DynamicSheetName);
+			ShiftDates(book, DynamicSheetName);
 
 			var str = sheet.Row(4).Cell(33).Value.ToString().Split(',').ToList()[0];
 
 			Console.WriteLine(DateTime.Parse(str));
 
 			book.Save();
+
+		}
+
+		private static void AddNearestDayToStatistic(XLWorkbook book, string dynamicTableName, string statisticTableName)
+		{
+			var dynamicSheet = book.Worksheets.Worksheet(dynamicTableName);
+			var statisticSheet = book.Worksheets.Worksheet(statisticTableName);
+
+			var date = GetDate(dynamicSheet, 1);
+
+			for (int i = FirstStringNum; i < FirstStringNum + WorkersCount; i++)
+			{
+				if (dynamicSheet.Cell(i, FirstColumnNum).Value.ToString().Equals("4"))
+				{
+					if (!statisticSheet.Cell(i, 2).Value.ToString().Equals(""))
+						statisticSheet.Cell(i, 2).Value += ", " + date.ToString("d");
+					else
+						statisticSheet.Cell(i, 2).Value += date.ToString("d");
+					
+				}
+			}
 
 		}
 
