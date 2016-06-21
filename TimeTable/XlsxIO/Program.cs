@@ -30,6 +30,11 @@ namespace XlsxIO
 			{
 				
 			}
+			var date = GetDate(sheet, 1);
+
+			CreatePatternCopyIfNotExist(book, "Шаблон", date);
+			
+
 			ShiftDays(book, sheetName);
 			ShiftDates(book, sheetName);
 
@@ -48,57 +53,47 @@ namespace XlsxIO
 			for (int i = FirstStringNum; i < FirstStringNum + WorkersCount; i++)
 				for (int j = FirstColumnNum; j < FirstColumnNum + DaysCount; j++)
 					sheet.Row(i).Cell(j).Value = sheet.Row(i).Cell(j + 1);
-
-			book.Save();
 		}
 
 		public static void ShiftDates(XLWorkbook book, string sheetName)
 		{
 			var sheet = book.Worksheets.Worksheet(sheetName);
 
-			var lastDate  = GetLastDate(sheet);
+			var lastDate  = GetDate(sheet, DaysCount);
 			var newLastDate = lastDate.AddDays(1);
 
 			for (int i = FirstStringNum - 2; i < FirstStringNum; i++)
 				for (int j = FirstColumnNum; j < FirstColumnNum + DaysCount; j++)
 					sheet.Row(i).Cell(j).Value = sheet.Row(i).Cell(j + 1);
 
-			SetLastDate(book, sheetName, newLastDate);
-			book.Save();
+			SetLastDate(sheet, newLastDate);
 		}
 
-		private static DateTime GetLastDate(ClosedXML.Excel.IXLWorksheet sheet)
+		private static DateTime GetDate(IXLWorksheet sheet, int dayNum)
 		{
-			var dayNum = int.Parse(sheet.Row(FirstStringNum - 1).Cell(FirstColumnNum + DaysCount - 1).Value.ToString());
-			var monthNum = int.Parse(sheet.Row(FirstStringNum - 2).Cell(FirstColumnNum + DaysCount - 1).Value.ToString());
-			var yearNum = int.Parse(sheet.Row(1).Cell(1).Value.ToString());
+			var day =	int.Parse(sheet.Row(FirstStringNum - 1).Cell(FirstColumnNum + dayNum - 1).Value.ToString());
+			var month = int.Parse(sheet.Row(FirstStringNum - 2).Cell(FirstColumnNum + dayNum - 1).Value.ToString());
+			var year =	int.Parse(sheet.Row(1).Cell(1).Value.ToString());
 
-			return new DateTime(yearNum, monthNum, dayNum);
+			return new DateTime(year, month, day);
 		}
 
-		private static void SetLastDate(XLWorkbook book, string sheetName, DateTime newLastDate)
+		private static void SetLastDate(IXLWorksheet sheet, DateTime newLastDate)
 		{
-			var sheet = book.Worksheets.Worksheet(sheetName);
-
 			sheet.Row(FirstStringNum - 1).Cell(FirstColumnNum + DaysCount - 1).Value = newLastDate.Day;
 			sheet.Row(FirstStringNum - 2).Cell(FirstColumnNum + DaysCount - 1).Value = newLastDate.Month;
 			sheet.Row(1).Cell(1).Value = newLastDate.Year;
-
-			book.Save();
 		}
 
-		public static void CreateListCopy(string xlsxFilename, string originalListName, string copyName)
+		public static void CreatePatternCopyIfNotExist(XLWorkbook book, string patternName, DateTime date)
 		{
-			var book = new XLWorkbook(xlsxFilename);
-			var sheet = book.Worksheets.Worksheet(originalListName);
-			try
-			{
-				book.Worksheets.Delete(copyName); 
-			}
-			catch (KeyNotFoundException)//sheet is not exists
-			{ }
-			sheet.CopyTo(copyName);
-			book.Save();
+			var sheet = book.Worksheets.Worksheet(patternName);
+			if (!book.Worksheets.Select(s => s.Name).Contains(date.ToString("MMMM")))
+				sheet.CopyTo(date.ToString("MMMM"));
+
+			var newSheet = book.Worksheets.Worksheet(date.ToString("MMMM"));
+			newSheet.Row(1).Cell(1).Value = date.Year;
+			newSheet.Row(2).Cell(1).Value = date.ToString("MMMM");
 		}
 
 		
