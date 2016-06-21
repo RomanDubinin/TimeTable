@@ -13,7 +13,7 @@ namespace XlsxIO
 
 		private static int WorkersCount = 14;
 		private static int DaysCount = 30;
-		private static int DistributedDaysCount = 7;
+		private static int HandledDaysCount = 7;
 
 		private static String DynamicSheetName = "Лист1";
 		private static String StatisticSheetName = "Карма";
@@ -38,11 +38,40 @@ namespace XlsxIO
 			ShiftDays(book, DynamicSheetName);
 			ShiftDates(book, DynamicSheetName);
 
+			HandleNewDay(book, DynamicSheetName, StatisticSheetName, HandledDaysCount);
+
 			var str = sheet.Row(4).Cell(33).Value.ToString().Split(',').ToList()[0];
 
 			Console.WriteLine(DateTime.Parse(str));
 
 			book.Save();
+
+		}
+
+		private static void HandleNewDay(XLWorkbook book, string dynamicTableName, string statisticTableName, int handledDaysCount)
+		{
+			var dynamicSheet = book.Worksheets.Worksheet(dynamicTableName);
+			var statisticSheet = book.Worksheets.Worksheet(statisticTableName);
+
+			var cells = new List<Tuple<IXLCell, int>>();
+			for (int i = FirstStringNum; i < FirstStringNum + WorkersCount; i++)
+				cells.Add(Tuple.Create(dynamicSheet.Cell(i, FirstColumnNum + handledDaysCount - 1),
+						  statisticSheet.Cell(i, 2).Value.ToString().Split(',').Length));
+
+			var r = new Random();
+			cells = cells.OrderBy(x => (r.Next())).ToList();
+
+			cells = cells.OrderBy(cell => cell.Item2).ToList();
+
+			var first = cells.Where(cell => cell.Item1.Style.Fill.BackgroundColor == XLColor.Lime).ToList();
+			var second = cells.Where(cell => cell.Item1.Style.Fill.BackgroundColor != XLColor.Lime && 
+											 cell.Item1.Style.Fill.BackgroundColor != XLColor.Red).ToList();
+
+			var pretendents = first.Concat(second).Take(2);
+			foreach (var pretendent in pretendents)
+			{
+				pretendent.Item1.Value = "4";
+			}
 
 		}
 
