@@ -56,16 +56,29 @@ namespace XlsxIO
 		{
 			var sheet = book.Worksheets.Worksheet(sheetName);
 
-			var dayNum =	int.Parse(sheet.Row(FirstStringNum - 1).Cell(FirstColumnNum + DaysCount - 1).Value.ToString());
-			var monthNum =	int.Parse(sheet.Row(FirstStringNum - 2).Cell(FirstColumnNum + DaysCount - 1).Value.ToString());
-			var yearNum =	int.Parse(sheet.Row(1).Cell(1).Value.ToString());
-
-			var lastDate  = new DateTime(yearNum, monthNum, dayNum);
+			var lastDate  = GetLastDate(sheet);
 			var newLastDate = lastDate.AddDays(1);
 
 			for (int i = FirstStringNum - 2; i < FirstStringNum; i++)
 				for (int j = FirstColumnNum; j < FirstColumnNum + DaysCount; j++)
 					sheet.Row(i).Cell(j).Value = sheet.Row(i).Cell(j + 1);
+
+			SetLastDate(book, sheetName, newLastDate);
+			book.Save();
+		}
+
+		private static DateTime GetLastDate(ClosedXML.Excel.IXLWorksheet sheet)
+		{
+			var dayNum = int.Parse(sheet.Row(FirstStringNum - 1).Cell(FirstColumnNum + DaysCount - 1).Value.ToString());
+			var monthNum = int.Parse(sheet.Row(FirstStringNum - 2).Cell(FirstColumnNum + DaysCount - 1).Value.ToString());
+			var yearNum = int.Parse(sheet.Row(1).Cell(1).Value.ToString());
+
+			return new DateTime(yearNum, monthNum, dayNum);
+		}
+
+		private static void SetLastDate(XLWorkbook book, string sheetName, DateTime newLastDate)
+		{
+			var sheet = book.Worksheets.Worksheet(sheetName);
 
 			sheet.Row(FirstStringNum - 1).Cell(FirstColumnNum + DaysCount - 1).Value = newLastDate.Day;
 			sheet.Row(FirstStringNum - 2).Cell(FirstColumnNum + DaysCount - 1).Value = newLastDate.Month;
